@@ -1,4 +1,5 @@
 import express from "express";
+import userRoutes from "./routes/user.routes.js"
 
 const app = express()
 
@@ -9,5 +10,7 @@ app.get("/", (req, res) => {
         message: "API da plataforma Todo Serviço está funcionando!"
     })
 });
+
+app.use("/users", userRoutes);
 
 export default app;
