@@ -15,13 +15,14 @@ export async function createUserController(
     try {
         const data = createUserSchema.parse(req.body);
 
-        const user = await createUser(data);
+        const user = await createUser(data);    //Oobjeto enviado para service
 
         return res.status(201).json(user);
     } catch (error) {
         if(error instanceof z.ZodError) {
             return res.status(400).json({
-                massage: "Dados inválidos"
+                massage: "Dados inválidos",
+                errors: error.issues
             });
         }
 
