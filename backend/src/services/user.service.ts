@@ -7,7 +7,7 @@ interface CreateUserData {
     password: string;
 }
 
-export async function createUser(data: CreateUserData) {
+export async function createUser(data: CreateUserData) {        //objeto recebido do controller
     const email = data.email.toLowerCase().trim();
 
     const existingUser = await prisma.user.findUnique({
