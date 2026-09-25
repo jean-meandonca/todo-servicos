@@ -1,6 +1,7 @@
 import type {Request, Response} from "express";
 import {z} from "zod";
 import {createUser} from "../services/user.service.js"
+import { UserScalarFieldEnum } from "../generated/prisma/internal/prismaNamespace.js";
 
 const createUserSchema = z.object({
     name: z.string().min(2),
@@ -36,4 +37,11 @@ export async function createUserController(
             message: "Erro interno do servidor"
         });
     }
+}
+
+export function getMeController(req: Request, res: Response) {
+    return res.json({
+        userId: req.user?.userId,
+        role: req.user?.role
+    })
 }
