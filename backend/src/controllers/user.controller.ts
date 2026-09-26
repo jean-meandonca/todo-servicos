@@ -1,7 +1,6 @@
 import type {Request, Response} from "express";
 import {z} from "zod";
-import {createUser} from "../services/user.service.js"
-import { UserScalarFieldEnum } from "../generated/prisma/internal/prismaNamespace.js";
+import {createUser, getUserById} from "../services/user.service.js"
 
 const createUserSchema = z.object({
     name: z.string().min(2),
@@ -39,9 +38,14 @@ export async function createUserController(
     }
 }
 
-export function getMeController(req: Request, res: Response) {
-    return res.json({
-        userId: req.user?.userId,
-        role: req.user?.role
-    })
+export async function getMeController(req: Request, res: Response) {
+    const user = await getUserById(req.user!.userId)
+
+    if(!user) {
+        return res.status(404).json({
+            message: "Usuário não encontrado"
+        });
+    }
+
+    return res.json(user);
 }
