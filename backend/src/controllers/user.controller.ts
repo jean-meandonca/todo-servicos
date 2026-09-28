@@ -1,12 +1,18 @@
 import type {Request, Response} from "express";
 import {z} from "zod";
-import {createUser, getUserById} from "../services/user.service.js"
+import {createUser, getUserById, updateUser} from "../services/user.service.js"
 
 const createUserSchema = z.object({
     name: z.string().min(2),
     email: z.string().email(),
     password: z.string().min(6)
 });
+
+const updateUserSchema = z.object({
+    name: z.string().min(2).optional(),
+    email: z.string().email().optional(),
+    password: z.string().min(6).optional()
+})
 
 export async function createUserController(
     req: Request,
@@ -48,4 +54,25 @@ export async function getMeController(req: Request, res: Response) {
     }
 
     return res.json(user);
+}
+
+export async function updateMeController(req: Request, res: Response) {
+    try {
+        const data = updateUserSchema.parse(req.body);          //os dados que chegam, verificado o padrão pelo zod
+
+        const user = await updateUser(req.user!.userId, data);
+
+        return res.json(user);
+    } catch (error){
+        if(error instanceof z.ZodError) {
+            return res.status(400).json({
+                message: "Dados inválidos",
+                errors: error.issues
+            });
+        }
+
+        return res.status(400).json({
+            message: "Não foi possível atualizar o usuário"
+        })
+    }
 }
