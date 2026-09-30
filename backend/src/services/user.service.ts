@@ -70,7 +70,20 @@ export async function updateUser(userId: number, data: UpdateUserData){
     }
 
     if (data.email){
-        updateData.email = data.email.toLocaleLowerCase().trim();
+        const email = data.email.toLocaleLowerCase().trim();
+
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                email,
+                NOT: {id:userId}
+            }
+        });
+
+        if (existingUser){
+            throw new Error("E-mail já cadastrado");
+        }
+
+        updateData.email = email;
     }
 
     if (data.password){

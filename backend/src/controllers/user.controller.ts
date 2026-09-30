@@ -71,8 +71,14 @@ export async function updateMeController(req: Request, res: Response) {
             });
         }
 
-        return res.status(400).json({
-            message: "Não foi possível atualizar o usuário"
+        if (error instanceof Error) {
+            return res.status(400).json({
+                message: error.message
+            })
+        }
+
+        return res.status(500).json({
+            message: "Erro interno do servidor"
         })
     }
 }
