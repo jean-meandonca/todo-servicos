@@ -1,12 +1,12 @@
 import type {NextFunction, Request, Response} from "express";
 import jwt from "jsonwebtoken";
+import {prisma} from "../lib/prisma.js";
 
 interface JwtPayload {
     userId: number;
-    role: "USER" | "ADMIN";
 }
 
-export function authMiddleware(
+export async function authMiddleware(
     req: Request,
     res: Response,
     next: NextFunction
@@ -33,12 +33,38 @@ export function authMiddleware(
             process.env.JWT_SECRET!
         ) as JwtPayload;
 
-        req.user = decoded;
+        const user = await prisma.user.findUnique({
+            where: {
+                id: decoded.userId
+            },
+            select: {
+                id: true,
+                role: true,
+                status: true
+            }
+        });
+
+        if (!user) {
+            return res.status(401).json({
+                message: "Usuário não encontrado"
+            });
+        }
+
+        if(user.status === "BLOCKED"){
+            return res.status(403).json({
+                message: "Usuário bloqueado"
+            });
+        }
+
+        req.user = {
+            userId: user.id,
+            role: user.role
+        };
 
         next();
     } catch {
         return res.status(401).json({
             message: "Token inválido ou expirado"
-        })
+        });
     }
 }
